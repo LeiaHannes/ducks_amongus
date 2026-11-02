@@ -8,7 +8,7 @@
 <body>
 <main>
   <section id="loading" class="screen center">
-    <p id="loading-note" class="muted">Connecting to the ship…</p>
+    <p id="loading-note" class="muted">Connecting…</p>
   </section>
 
   <section id="setup" class="screen center" hidden>
@@ -18,7 +18,6 @@
 
   <section id="join" class="screen" hidden>
     <h1 class="logo">Chuckleducks do Among Us</h1>
-    <p class="logo-sub">Pick a name your friends will recognize.</p>
     <form id="join-form" novalidate>
       <label for="name">Your name</label>
       <input id="name" maxlength="16" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="go">
@@ -42,8 +41,8 @@
   </section>
 
   <section id="role" class="screen" hidden>
-    <p id="role-warning">Shield your screen before you look.</p>
-    <button id="reveal" type="button" aria-expanded="false">Show my role</button>
+    <p id="role-warning"></p>
+    <button id="reveal" type="button" aria-expanded="false">Show role</button>
     <div id="role-card" hidden>
       <p id="role-you"></p>
       <h1 id="role-title"></h1>
