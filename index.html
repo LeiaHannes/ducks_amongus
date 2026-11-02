@@ -3,133 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#141a2e">
 <title>Crew Night</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --space: #141a2e;
-    --hull: #1e2742;
-    --line: #334064;
-    --text: #eef1f8;
-    --muted: #9aa6c6;
-    --signal: #ffcc4d;
-    --signal-dark: #c9971e;
-    --crew: #4fd1e8;
-    --imp: #ff4f5e;
-    color-scheme: dark;
-    box-sizing: border-box;
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  *, *::before, *::after { box-sizing: inherit; }
-  [hidden] { display: none !important; }
-  html, body { height: 100%; margin: 0; }
-  body {
-    background: var(--space);
-    background-image:
-      radial-gradient(1px 1px at 20% 30%, #ffffff55, transparent),
-      radial-gradient(1px 1px at 70% 15%, #ffffff44, transparent),
-      radial-gradient(1.5px 1.5px at 85% 60%, #ffffff33, transparent),
-      radial-gradient(1px 1px at 35% 80%, #ffffff44, transparent);
-    color: var(--text);
-    font: 400 1.0625rem/1.5 "Baloo 2", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
-    transition: background-color .25s;
-  }
-  @media (prefers-reduced-motion: reduce) { body { transition: none; } }
-
-  main {
-    min-height: 100%;
-    max-width: 28rem;
-    margin: 0 auto;
-    padding: 1.5rem 1.25rem;
-    display: flex;
-    flex-direction: column;
-  }
-  .screen { flex: 1; display: flex; flex-direction: column; gap: 1rem; }
-  .center { justify-content: center; text-align: center; }
-  h1, h2, p { margin: 0; }
-  .muted { color: var(--muted); }
-
-  .logo { font-size: clamp(2.75rem, 14vw, 4rem); font-weight: 800; line-height: 1; margin-top: 2rem; }
-  .logo-sub { color: var(--muted); }
-  #join-form { margin-top: auto; display: flex; flex-direction: column; gap: .6rem; }
-  label { font-weight: 600; }
-  input {
-    width: 100%;
-    font: inherit;
-    font-size: 1.375rem;
-    padding: .7rem 1rem;
-    border-radius: 14px;
-    border: 2px solid var(--line);
-    background: var(--hull);
-    color: var(--text);
-  }
-  input:focus-visible { outline: 3px solid var(--signal); outline-offset: 2px; }
-  .error { color: var(--imp); min-height: 1.5em; font-weight: 600; }
-
-  .btn {
-    width: 100%;
-    font: inherit;
-    font-weight: 800;
-    font-size: 1.25rem;
-    padding: .8rem 1rem;
-    border: 0;
-    border-radius: 14px;
-    background: var(--signal);
-    color: #1a1405;
-    box-shadow: 0 4px 0 var(--signal-dark);
-    cursor: pointer;
-  }
-  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--signal-dark); }
-  .btn:disabled { opacity: .5; cursor: default; }
-  .btn.ghost { background: transparent; color: var(--muted); box-shadow: none; border: 2px solid var(--line); font-weight: 600; font-size: 1.0625rem; }
-  button:focus-visible { outline: 3px solid var(--signal); outline-offset: 3px; }
-
-  .me { font-size: clamp(2.25rem, 11vw, 3rem); font-weight: 800; line-height: 1.05; overflow-wrap: anywhere; }
-  .waiting { font-size: 1.125rem; }
-  #lobby-count { font-size: 1rem; color: var(--muted); font-weight: 600; margin-top: .5rem; }
-  .roster { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
-  .roster li {
-    display: flex; align-items: center; gap: .75rem;
-    padding: .55rem .9rem; background: var(--hull); border-radius: 12px; font-weight: 600;
-    overflow-wrap: anywhere;
-  }
-  .dot {
-    flex: none; width: 1.1rem; height: 1.35rem;
-    border-radius: 50% 50% 42% 42%;
-    background: var(--c);
-    box-shadow: inset -3px -2px 0 #00000040, 0 0 0 1px #ffffff22;
-  }
-  #leave { margin-top: auto; }
-
-  /* Role reveal: the whole screen floods with the role color while revealed */
-  .reveal {
-    flex: 1; width: 100%;
-    font: inherit; color: inherit;
-    background: var(--hull);
-    border: 2px dashed var(--line);
-    border-radius: 24px;
-    padding: 2rem 1.25rem;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-  }
-  .reveal span { display: block; }
-  .face { display: flex; flex-direction: column; gap: .6rem; }
-  .shown-face { display: none; }
-  .tap-big { font-size: 1.75rem; font-weight: 800; line-height: 1.1; }
-  body[data-reveal] .hidden-face { display: none; }
-  body[data-reveal] .shown-face { display: flex; }
-  body[data-reveal="crewmate"] { background-color: var(--crew); background-image: none; color: #062a33; }
-  body[data-reveal="imposter"] { background-color: var(--imp); background-image: none; color: #2b0306; }
-  body[data-reveal] .reveal { background: transparent; border-color: currentColor; }
-  .role-title { font-size: clamp(3.25rem, 17vw, 5.5rem); font-weight: 800; line-height: .95; }
-  .role-you { font-weight: 600; font-size: 1.25rem; }
-  .role-note { font-size: 1.2rem; }
-  .tap-hide { margin-top: 1.5rem; opacity: .7; }
-</style>
 </head>
 <body>
 <main>
@@ -168,18 +42,13 @@
   </section>
 
   <section id="role" class="screen" hidden>
-    <button id="reveal" class="reveal" type="button" aria-pressed="false">
-      <span class="face hidden-face">
-        <span class="tap-big">Tap to see your role</span>
-        <span class="muted">Shield your screen first.</span>
-      </span>
-      <span class="face shown-face">
-        <span id="role-you" class="role-you"></span>
-        <span id="role-title" class="role-title"></span>
-        <span id="role-note" class="role-note"></span>
-        <span class="tap-hide">Tap to hide</span>
-      </span>
-    </button>
+    <p id="role-warning">Shield your screen before you look.</p>
+    <button id="reveal" type="button" aria-expanded="false">Show my role</button>
+    <div id="role-card" hidden>
+      <p id="role-you"></p>
+      <h1 id="role-title"></h1>
+      <p id="role-note"></p>
+    </div>
   </section>
 </main>
 
@@ -282,15 +151,21 @@
     if (document.body.dataset.reveal) document.body.dataset.reveal = me.role;
   }
 
+  // body gets data-reveal="crewmate" or "imposter" while the role is showing,
+  // which you can use later to style the whole screen.
   function hideRole() {
+    $("role-card").hidden = true;
+    $("reveal").textContent = "Show my role";
+    $("reveal").setAttribute("aria-expanded", "false");
     delete document.body.dataset.reveal;
-    $("reveal").setAttribute("aria-pressed", "false");
   }
 
   $("reveal").addEventListener("click", () => {
-    if (document.body.dataset.reveal) { hideRole(); return; }
+    if (!$("role-card").hidden) { hideRole(); return; }
+    $("role-card").hidden = false;
+    $("reveal").textContent = "Hide my role";
+    $("reveal").setAttribute("aria-expanded", "true");
     document.body.dataset.reveal = $("reveal").dataset.role;
-    $("reveal").setAttribute("aria-pressed", "true");
   });
 
   $("join-form").addEventListener("submit", async (e) => {

@@ -4,103 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Crew Night host</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --space: #141a2e;
-    --hull: #1e2742;
-    --line: #334064;
-    --text: #eef1f8;
-    --muted: #9aa6c6;
-    --signal: #ffcc4d;
-    --signal-dark: #c9971e;
-    --crew: #4fd1e8;
-    --imp: #ff4f5e;
-    color-scheme: dark;
-    box-sizing: border-box;
-  }
-  *, *::before, *::after { box-sizing: inherit; }
-  [hidden] { display: none !important; }
-  html, body { margin: 0; min-height: 100%; }
-  body {
-    background: var(--space);
-    color: var(--text);
-    font: 400 1.0625rem/1.5 "Baloo 2", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
-  }
-  h1, h2, p { margin: 0; }
-  .muted { color: var(--muted); }
-
-  main {
-    max-width: 72rem;
-    margin: 0 auto;
-    padding: 2rem 1.5rem;
-    display: grid;
-    grid-template-columns: minmax(16rem, 22rem) 1fr;
-    gap: 2.5rem;
-  }
-  @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
-
-  header { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-  header h1 { font-size: 2.5rem; font-weight: 800; line-height: 1; }
-  .status { font-weight: 600; font-size: 1.125rem; padding: .25rem .9rem; border-radius: 999px; background: var(--hull); }
-  .status.live { background: var(--imp); color: #2b0306; }
-  #notice { grid-column: 1 / -1; color: var(--imp); font-weight: 600; }
-
-  .controls { display: flex; flex-direction: column; gap: 1rem; }
-  .url { font-size: 1.6rem; font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; color: var(--signal); }
-  .setting {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: .75rem 1rem; background: var(--hull); border-radius: 14px; font-weight: 600;
-  }
-  .stepper { display: flex; align-items: center; gap: .75rem; }
-  .stepper button {
-    width: 2.5rem; height: 2.5rem; border-radius: 50%;
-    border: 2px solid var(--line); background: transparent; color: var(--text);
-    font: inherit; font-size: 1.4rem; font-weight: 800; line-height: 1; cursor: pointer;
-  }
-  .stepper button:disabled { opacity: .35; cursor: default; }
-  .stepper output { font-size: 1.6rem; font-weight: 800; min-width: 1.5ch; text-align: center; }
-
-  .btn {
-    width: 100%;
-    font: inherit; font-weight: 800; font-size: 1.25rem;
-    padding: .8rem 1rem; border: 0; border-radius: 14px;
-    background: var(--signal); color: #1a1405;
-    box-shadow: 0 4px 0 var(--signal-dark); cursor: pointer;
-  }
-  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--signal-dark); }
-  .btn:disabled { opacity: .5; cursor: default; }
-  .btn.ghost { background: transparent; color: var(--text); box-shadow: none; border: 2px solid var(--line); font-weight: 600; font-size: 1.0625rem; }
-  .link { align-self: flex-start; background: none; border: 0; padding: 0; color: var(--muted); font: inherit; text-decoration: underline; cursor: pointer; margin-top: 1rem; }
-  button:focus-visible { outline: 3px solid var(--signal); outline-offset: 3px; }
-
-  #count { font-size: 1.25rem; font-weight: 600; color: var(--muted); margin-bottom: 1rem; }
-  .roster { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: .75rem; }
-  .roster li {
-    display: flex; align-items: center; gap: .8rem;
-    padding: .7rem 1rem; background: var(--hull); border-radius: 14px;
-    font-size: 1.5rem; font-weight: 800; line-height: 1.15;
-  }
-  .roster .name { flex: 1; overflow-wrap: anywhere; }
-  .dot {
-    flex: none; width: 1.4rem; height: 1.7rem;
-    border-radius: 50% 50% 42% 42%;
-    background: var(--c);
-    box-shadow: inset -4px -3px 0 #00000040, 0 0 0 1px #ffffff22;
-  }
-  .tag { font-size: .85rem; font-weight: 800; padding: .1rem .55rem; border-radius: 999px; }
-  .tag.crewmate { background: var(--crew); color: #062a33; }
-  .tag.imposter { background: var(--imp); color: #2b0306; }
-  .kick {
-    flex: none; width: 2rem; height: 2rem; border-radius: 50%;
-    border: 0; background: transparent; color: var(--muted);
-    font: inherit; font-size: 1.1rem; cursor: pointer;
-  }
-  .kick:hover { background: var(--line); color: var(--text); }
-  #empty { font-size: 1.25rem; }
-</style>
 </head>
 <body>
 <main>
@@ -220,7 +123,7 @@
         const tag = document.createElement("span");
         tag.className = `tag ${p.role}`;
         tag.textContent = p.role === "imposter" ? "Imposter" : "Crewmate";
-        li.append(tag);
+        li.append(" ", tag);
       }
 
       const kick = document.createElement("button");
@@ -231,7 +134,7 @@
       kick.addEventListener("click", () => {
         if (confirm(`Remove ${p.name} from the game?`)) remove(ref(db, `game/players/${id}`));
       });
-      li.append(kick);
+      li.append(" ", kick);
 
       return li;
     }));
