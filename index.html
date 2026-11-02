@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#141a2e">
+<title>Crew Night</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --space: #141a2e;
+    --hull: #1e2742;
+    --line: #334064;
+    --text: #eef1f8;
+    --muted: #9aa6c6;
+    --signal: #ffcc4d;
+    --signal-dark: #c9971e;
+    --crew: #4fd1e8;
+    --imp: #ff4f5e;
+    color-scheme: dark;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--space);
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, #ffffff55, transparent),
+      radial-gradient(1px 1px at 70% 15%, #ffffff44, transparent),
+      radial-gradient(1.5px 1.5px at 85% 60%, #ffffff33, transparent),
+      radial-gradient(1px 1px at 35% 80%, #ffffff44, transparent);
+    color: var(--text);
+    font: 400 1.0625rem/1.5 "Baloo 2", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+    transition: background-color .25s;
+  }
+  @media (prefers-reduced-motion: reduce) { body { transition: none; } }
+
+  main {
+    min-height: 100%;
+    max-width: 28rem;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .screen { flex: 1; display: flex; flex-direction: column; gap: 1rem; }
+  .center { justify-content: center; text-align: center; }
+  h1, h2, p { margin: 0; }
+  .muted { color: var(--muted); }
+
+  .logo { font-size: clamp(2.75rem, 14vw, 4rem); font-weight: 800; line-height: 1; margin-top: 2rem; }
+  .logo-sub { color: var(--muted); }
+  #join-form { margin-top: auto; display: flex; flex-direction: column; gap: .6rem; }
+  label { font-weight: 600; }
+  input {
+    width: 100%;
+    font: inherit;
+    font-size: 1.375rem;
+    padding: .7rem 1rem;
+    border-radius: 14px;
+    border: 2px solid var(--line);
+    background: var(--hull);
+    color: var(--text);
+  }
+  input:focus-visible { outline: 3px solid var(--signal); outline-offset: 2px; }
+  .error { color: var(--imp); min-height: 1.5em; font-weight: 600; }
+
+  .btn {
+    width: 100%;
+    font: inherit;
+    font-weight: 800;
+    font-size: 1.25rem;
+    padding: .8rem 1rem;
+    border: 0;
+    border-radius: 14px;
+    background: var(--signal);
+    color: #1a1405;
+    box-shadow: 0 4px 0 var(--signal-dark);
+    cursor: pointer;
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--signal-dark); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn.ghost { background: transparent; color: var(--muted); box-shadow: none; border: 2px solid var(--line); font-weight: 600; font-size: 1.0625rem; }
+  button:focus-visible { outline: 3px solid var(--signal); outline-offset: 3px; }
+
+  .me { font-size: clamp(2.25rem, 11vw, 3rem); font-weight: 800; line-height: 1.05; overflow-wrap: anywhere; }
+  .waiting { font-size: 1.125rem; }
+  #lobby-count { font-size: 1rem; color: var(--muted); font-weight: 600; margin-top: .5rem; }
+  .roster { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
+  .roster li {
+    display: flex; align-items: center; gap: .75rem;
+    padding: .55rem .9rem; background: var(--hull); border-radius: 12px; font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+  .dot {
+    flex: none; width: 1.1rem; height: 1.35rem;
+    border-radius: 50% 50% 42% 42%;
+    background: var(--c);
+    box-shadow: inset -3px -2px 0 #00000040, 0 0 0 1px #ffffff22;
+  }
+  #leave { margin-top: auto; }
+
+  /* Role reveal: the whole screen floods with the role color while revealed */
+  .reveal {
+    flex: 1; width: 100%;
+    font: inherit; color: inherit;
+    background: var(--hull);
+    border: 2px dashed var(--line);
+    border-radius: 24px;
+    padding: 2rem 1.25rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .reveal span { display: block; }
+  .face { display: flex; flex-direction: column; gap: .6rem; }
+  .shown-face { display: none; }
+  .tap-big { font-size: 1.75rem; font-weight: 800; line-height: 1.1; }
+  body[data-reveal] .hidden-face { display: none; }
+  body[data-reveal] .shown-face { display: flex; }
+  body[data-reveal="crewmate"] { background-color: var(--crew); background-image: none; color: #062a33; }
+  body[data-reveal="imposter"] { background-color: var(--imp); background-image: none; color: #2b0306; }
+  body[data-reveal] .reveal { background: transparent; border-color: currentColor; }
+  .role-title { font-size: clamp(3.25rem, 17vw, 5.5rem); font-weight: 800; line-height: .95; }
+  .role-you { font-weight: 600; font-size: 1.25rem; }
+  .role-note { font-size: 1.2rem; }
+  .tap-hide { margin-top: 1.5rem; opacity: .7; }
+</style>
+</head>
+<body>
+<main>
+  <section id="loading" class="screen center">
+    <p id="loading-note" class="muted">Connecting to the ship…</p>
+  </section>
+
+  <section id="setup" class="screen center" hidden>
+    <h1>Almost ready</h1>
+    <p class="muted">Paste your Firebase settings (including databaseURL) into firebase.js, then reload this page.</p>
+  </section>
+
+  <section id="join" class="screen" hidden>
+    <h1 class="logo">Crew Night</h1>
+    <p class="logo-sub">Pick a name your friends will recognize.</p>
+    <form id="join-form" novalidate>
+      <label for="name">Your name</label>
+      <input id="name" maxlength="16" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="go">
+      <p id="join-error" class="error" role="alert"></p>
+      <button id="join-btn" type="submit" class="btn">Join game</button>
+    </form>
+  </section>
+
+  <section id="lobby" class="screen" hidden>
+    <p class="muted">You’re in as</p>
+    <h1 id="lobby-name" class="me"></h1>
+    <p class="waiting">Waiting for the host to start the game.</p>
+    <h2 id="lobby-count"></h2>
+    <ul id="lobby-players" class="roster"></ul>
+    <button id="leave" class="btn ghost" type="button">Leave game</button>
+  </section>
+
+  <section id="busy" class="screen center" hidden>
+    <h1>Game in progress</h1>
+    <p class="muted">You can join when the host opens the next round. This page updates on its own.</p>
+  </section>
+
+  <section id="role" class="screen" hidden>
+    <button id="reveal" class="reveal" type="button" aria-pressed="false">
+      <span class="face hidden-face">
+        <span class="tap-big">Tap to see your role</span>
+        <span class="muted">Shield your screen first.</span>
+      </span>
+      <span class="face shown-face">
+        <span id="role-you" class="role-you"></span>
+        <span id="role-title" class="role-title"></span>
+        <span id="role-note" class="role-note"></span>
+        <span class="tap-hide">Tap to hide</span>
+      </span>
+    </button>
+  </section>
+</main>
+
+<script type="module">
+  import { db, configured, ref, onValue, push, set, remove, serverTimestamp, PLAYER_COLORS } from "./firebase.js";
+
+  const $ = (id) => document.getElementById(id);
+  const SCREENS = ["loading", "setup", "join", "lobby", "busy", "role"];
+
+  // Remember who this phone is, so a refresh or a sleeping phone rejoins as the same player.
+  const saved = (key) => ({
+    get() { try { return localStorage.getItem(key); } catch { return null; } },
+    set(v) { try { localStorage.setItem(key, v); } catch {} },
+    clear() { try { localStorage.removeItem(key); } catch {} },
+  });
+  const savedId = saved("crewnight-player-id");
+  const savedName = saved("crewnight-player-name");
+
+  let myId = savedId.get();
+  let joining = false;
+  let game = {};
+
+  $("name").value = savedName.get() || "";
+
+  function show(name) {
+    for (const s of SCREENS) $(s).hidden = s !== name;
+    if (name !== "role") hideRole();
+  }
+
+  if (!configured) {
+    show("setup");
+  } else {
+    const slow = setTimeout(() => {
+      $("loading-note").textContent = "Still connecting. Check that databaseURL in firebase.js is correct.";
+    }, 8000);
+
+    onValue(ref(db, "game"), (snap) => {
+      clearTimeout(slow);
+      game = snap.val() || {};
+      render();
+    }, () => {
+      clearTimeout(slow);
+      $("loading-note").textContent = "The database refused the connection. Make sure its rules allow reading and writing.";
+      show("loading");
+    });
+  }
+
+  function render() {
+    const players = game.players || {};
+    const status = game.status || "lobby";
+    const me = myId ? players[myId] : null;
+
+    // Removed by the host (or the game was reset): forget this player.
+    if (myId && !me && !joining) {
+      myId = null;
+      savedId.clear();
+    }
+
+    if (!me) { show(status === "lobby" ? "join" : "busy"); return; }
+    if (status === "lobby") { renderLobby(me, players); show("lobby"); return; }
+    if (me.role) { renderRole(me, players); show("role"); return; }
+    show("busy");
+  }
+
+  function sortedPlayers(players) {
+    return Object.entries(players).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
+  }
+
+  function playerItem(p, isMe) {
+    const li = document.createElement("li");
+    const dot = document.createElement("span");
+    dot.className = "dot";
+    dot.style.setProperty("--c", PLAYER_COLORS[(p.color || 0) % PLAYER_COLORS.length]);
+    li.append(dot, p.name + (isMe ? " (you)" : ""));
+    return li;
+  }
+
+  function renderLobby(me, players) {
+    const list = sortedPlayers(players);
+    $("lobby-name").textContent = me.name;
+    $("lobby-count").textContent = list.length === 1 ? "1 player" : `${list.length} players`;
+    $("lobby-players").replaceChildren(...list.map(([id, p]) => playerItem(p, id === myId)));
+  }
+
+  function renderRole(me, players) {
+    const isImp = me.role === "imposter";
+    $("role-you").textContent = me.name;
+    $("role-title").textContent = isImp ? "Imposter" : "Crewmate";
+    if (isImp) {
+      const partners = Object.entries(players)
+        .filter(([id, p]) => id !== myId && p.role === "imposter")
+        .map(([, p]) => p.name);
+      $("role-note").textContent = partners.length
+        ? `Your partner${partners.length > 1 ? "s" : ""}: ${partners.join(", ")}`
+        : "You’re the only imposter. Blend in.";
+    } else {
+      $("role-note").textContent = "Finish your tasks and find the imposter.";
+    }
+    $("reveal").dataset.role = me.role;
+    if (document.body.dataset.reveal) document.body.dataset.reveal = me.role;
+  }
+
+  function hideRole() {
+    delete document.body.dataset.reveal;
+    $("reveal").setAttribute("aria-pressed", "false");
+  }
+
+  $("reveal").addEventListener("click", () => {
+    if (document.body.dataset.reveal) { hideRole(); return; }
+    document.body.dataset.reveal = $("reveal").dataset.role;
+    $("reveal").setAttribute("aria-pressed", "true");
+  });
+
+  $("join-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const err = $("join-error");
+    const name = $("name").value.trim().replace(/\s+/g, " ");
+    const players = game.players || {};
+
+    if (!name) { err.textContent = "Type a name to join."; return; }
+    if (Object.values(players).some((p) => p.name.toLowerCase() === name.toLowerCase())) {
+      err.textContent = `Someone is already called “${name}”. Pick another name.`;
+      return;
+    }
+    err.textContent = "";
+
+    const used = new Set(Object.values(players).map((p) => p.color));
+    let color = PLAYER_COLORS.findIndex((_, i) => !used.has(i));
+    if (color < 0) color = Object.keys(players).length % PLAYER_COLORS.length;
+
+    $("join-btn").disabled = true;
+    joining = true;
+    const newRef = push(ref(db, "game/players"));
+    myId = newRef.key;
+    savedId.set(myId);
+    savedName.set(name);
+
+    try {
+      await set(newRef, { name, color, joinedAt: serverTimestamp() });
+    } catch {
+      myId = null;
+      savedId.clear();
+      err.textContent = "Couldn’t join. Check your connection and try again.";
+    } finally {
+      joining = false;
+      $("join-btn").disabled = false;
+      render();
+    }
+  });
+
+  $("leave").addEventListener("click", () => {
+    if (myId) remove(ref(db, `game/players/${myId}`));
+  });
+</script>
+</body>
+</html>

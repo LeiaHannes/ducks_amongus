@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crew Night host</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --space: #141a2e;
+    --hull: #1e2742;
+    --line: #334064;
+    --text: #eef1f8;
+    --muted: #9aa6c6;
+    --signal: #ffcc4d;
+    --signal-dark: #c9971e;
+    --crew: #4fd1e8;
+    --imp: #ff4f5e;
+    color-scheme: dark;
+    box-sizing: border-box;
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: var(--space);
+    color: var(--text);
+    font: 400 1.0625rem/1.5 "Baloo 2", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  h1, h2, p { margin: 0; }
+  .muted { color: var(--muted); }
+
+  main {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    display: grid;
+    grid-template-columns: minmax(16rem, 22rem) 1fr;
+    gap: 2.5rem;
+  }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
+
+  header { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  header h1 { font-size: 2.5rem; font-weight: 800; line-height: 1; }
+  .status { font-weight: 600; font-size: 1.125rem; padding: .25rem .9rem; border-radius: 999px; background: var(--hull); }
+  .status.live { background: var(--imp); color: #2b0306; }
+  #notice { grid-column: 1 / -1; color: var(--imp); font-weight: 600; }
+
+  .controls { display: flex; flex-direction: column; gap: 1rem; }
+  .url { font-size: 1.6rem; font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; color: var(--signal); }
+  .setting {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem 1rem; background: var(--hull); border-radius: 14px; font-weight: 600;
+  }
+  .stepper { display: flex; align-items: center; gap: .75rem; }
+  .stepper button {
+    width: 2.5rem; height: 2.5rem; border-radius: 50%;
+    border: 2px solid var(--line); background: transparent; color: var(--text);
+    font: inherit; font-size: 1.4rem; font-weight: 800; line-height: 1; cursor: pointer;
+  }
+  .stepper button:disabled { opacity: .35; cursor: default; }
+  .stepper output { font-size: 1.6rem; font-weight: 800; min-width: 1.5ch; text-align: center; }
+
+  .btn {
+    width: 100%;
+    font: inherit; font-weight: 800; font-size: 1.25rem;
+    padding: .8rem 1rem; border: 0; border-radius: 14px;
+    background: var(--signal); color: #1a1405;
+    box-shadow: 0 4px 0 var(--signal-dark); cursor: pointer;
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--signal-dark); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn.ghost { background: transparent; color: var(--text); box-shadow: none; border: 2px solid var(--line); font-weight: 600; font-size: 1.0625rem; }
+  .link { align-self: flex-start; background: none; border: 0; padding: 0; color: var(--muted); font: inherit; text-decoration: underline; cursor: pointer; margin-top: 1rem; }
+  button:focus-visible { outline: 3px solid var(--signal); outline-offset: 3px; }
+
+  #count { font-size: 1.25rem; font-weight: 600; color: var(--muted); margin-bottom: 1rem; }
+  .roster { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: .75rem; }
+  .roster li {
+    display: flex; align-items: center; gap: .8rem;
+    padding: .7rem 1rem; background: var(--hull); border-radius: 14px;
+    font-size: 1.5rem; font-weight: 800; line-height: 1.15;
+  }
+  .roster .name { flex: 1; overflow-wrap: anywhere; }
+  .dot {
+    flex: none; width: 1.4rem; height: 1.7rem;
+    border-radius: 50% 50% 42% 42%;
+    background: var(--c);
+    box-shadow: inset -4px -3px 0 #00000040, 0 0 0 1px #ffffff22;
+  }
+  .tag { font-size: .85rem; font-weight: 800; padding: .1rem .55rem; border-radius: 999px; }
+  .tag.crewmate { background: var(--crew); color: #062a33; }
+  .tag.imposter { background: var(--imp); color: #2b0306; }
+  .kick {
+    flex: none; width: 2rem; height: 2rem; border-radius: 50%;
+    border: 0; background: transparent; color: var(--muted);
+    font: inherit; font-size: 1.1rem; cursor: pointer;
+  }
+  .kick:hover { background: var(--line); color: var(--text); }
+  #empty { font-size: 1.25rem; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Crew Night</h1>
+    <p id="status" class="status">Connecting…</p>
+  </header>
+  <p id="notice" hidden></p>
+
+  <section class="controls">
+    <p class="muted">Players join at</p>
+    <p id="join-url" class="url"></p>
+
+    <div class="setting">
+      <span>Imposters</span>
+      <div class="stepper">
+        <button id="imp-minus" type="button" aria-label="Fewer imposters">−</button>
+        <output id="imp-count">1</output>
+        <button id="imp-plus" type="button" aria-label="More imposters">+</button>
+      </div>
+    </div>
+
+    <button id="start" class="btn" type="button">Start game</button>
+    <p id="start-hint" class="muted"></p>
+    <button id="end" class="btn" type="button" hidden>End round</button>
+    <button id="toggle-roles" class="btn ghost" type="button" hidden>Show roles</button>
+    <button id="clear" class="link" type="button">Remove all players</button>
+  </section>
+
+  <section>
+    <h2 id="count"></h2>
+    <ul id="roster" class="roster"></ul>
+    <p id="empty" class="muted">No one has joined yet. Share the link to get started.</p>
+  </section>
+</main>
+
+<script type="module">
+  import { db, configured, ref, onValue, set, update, remove, PLAYER_COLORS } from "./firebase.js";
+
+  const MIN_PLAYERS = 3; // lower this temporarily if you want to test with fewer devices
+  const $ = (id) => document.getElementById(id);
+
+  let game = {};
+  let showRoles = false;
+
+  $("join-url").textContent = new URL("./", location.href).href.replace(/^https?:\/\//, "");
+
+  function notice(text) {
+    $("notice").textContent = text;
+    $("notice").hidden = !text;
+  }
+
+  if (!configured) {
+    notice("Paste your Firebase settings (including databaseURL) into firebase.js, then reload this page.");
+    $("status").textContent = "Not set up";
+  } else {
+    onValue(ref(db, "game"), (snap) => {
+      game = snap.val() || {};
+      if (!game.status) {
+        update(ref(db, "game"), { status: "lobby", imposters: game.imposters || 1 });
+        return;
+      }
+      notice("");
+      render();
+    }, () => {
+      notice("The database refused the connection. Make sure its rules allow reading and writing.");
+    });
+  }
+
+  const maxImposters = (n) => Math.max(1, Math.floor((n - 1) / 2));
+
+  function sortedPlayers() {
+    return Object.entries(game.players || {}).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
+  }
+
+  function render() {
+    const players = sortedPlayers();
+    const n = players.length;
+    const playing = game.status === "playing";
+    const max = maxImposters(n);
+    const k = Math.min(game.imposters || 1, max);
+
+    $("status").textContent = playing ? "Game in progress" : "Lobby open";
+    $("status").classList.toggle("live", playing);
+    $("count").textContent = n === 1 ? "1 player" : `${n} players`;
+
+    $("imp-count").textContent = k;
+    $("imp-minus").disabled = playing || k <= 1;
+    $("imp-plus").disabled = playing || k >= max;
+
+    $("start").hidden = playing;
+    $("start").disabled = n < MIN_PLAYERS;
+    $("start-hint").textContent = playing
+      ? ""
+      : n < MIN_PLAYERS
+        ? `You need at least ${MIN_PLAYERS} players to start.`
+        : `${k} imposter${k > 1 ? "s" : ""} among ${n} players.`;
+    $("end").hidden = !playing;
+    $("toggle-roles").hidden = !playing;
+    $("toggle-roles").textContent = showRoles ? "Hide roles" : "Show roles";
+
+    $("empty").hidden = n > 0;
+    $("roster").replaceChildren(...players.map(([id, p]) => {
+      const li = document.createElement("li");
+
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      dot.style.setProperty("--c", PLAYER_COLORS[(p.color || 0) % PLAYER_COLORS.length]);
+
+      const name = document.createElement("span");
+      name.className = "name";
+      name.textContent = p.name;
+
+      li.append(dot, name);
+
+      if (playing && showRoles && p.role) {
+        const tag = document.createElement("span");
+        tag.className = `tag ${p.role}`;
+        tag.textContent = p.role === "imposter" ? "Imposter" : "Crewmate";
+        li.append(tag);
+      }
+
+      const kick = document.createElement("button");
+      kick.className = "kick";
+      kick.type = "button";
+      kick.textContent = "✕";
+      kick.setAttribute("aria-label", `Remove ${p.name}`);
+      kick.addEventListener("click", () => {
+        if (confirm(`Remove ${p.name} from the game?`)) remove(ref(db, `game/players/${id}`));
+      });
+      li.append(kick);
+
+      return li;
+    }));
+  }
+
+  function changeImposters(delta) {
+    const n = Object.keys(game.players || {}).length;
+    const current = Math.min(game.imposters || 1, maxImposters(n));
+    const next = Math.min(Math.max(current + delta, 1), maxImposters(n));
+    set(ref(db, "game/imposters"), next);
+  }
+  $("imp-minus").addEventListener("click", () => changeImposters(-1));
+  $("imp-plus").addEventListener("click", () => changeImposters(1));
+
+  // The host picks roles once and writes them all in a single update,
+  // so every phone sees the same result at the same moment.
+  $("start").addEventListener("click", () => {
+    const ids = Object.keys(game.players || {});
+    const k = Math.min(game.imposters || 1, maxImposters(ids.length));
+
+    for (let i = ids.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+
+    const changes = { status: "playing" };
+    ids.forEach((id, i) => { changes[`players/${id}/role`] = i < k ? "imposter" : "crewmate"; });
+
+    showRoles = false;
+    update(ref(db, "game"), changes);
+  });
+
+  // Back to the lobby with the same players, roles cleared.
+  $("end").addEventListener("click", () => {
+    if (!confirm("End this round and send everyone back to the lobby?")) return;
+    const changes = { status: "lobby" };
+    for (const id of Object.keys(game.players || {})) changes[`players/${id}/role`] = null;
+    update(ref(db, "game"), changes);
+  });
+
+  $("toggle-roles").addEventListener("click", () => {
+    showRoles = !showRoles;
+    render();
+  });
+
+  $("clear").addEventListener("click", () => {
+    if (!confirm("Remove every player and reopen the lobby?")) return;
+    update(ref(db, "game"), { players: null, status: "lobby" });
+  });
+</script>
+</body>
+</html>
